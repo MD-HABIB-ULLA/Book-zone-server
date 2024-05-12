@@ -70,7 +70,7 @@ async function run() {
             console.log(user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             res
-                .cookie('token', token, cookieOptions )
+                .cookie('token', token, cookieOptions)
                 .send({ success: true })
         })
 
@@ -87,6 +87,19 @@ async function run() {
             const result = await categoryCollection.find().toArray();
             res.send(result)
         })
+        app.get('/category/:category', async (req, res) => {
+            const category = req.params.category;
+            console.log(category)
+            const query = { "bookData.category": category }
+            const result = await allBooksCollection.find(query).toArray();
+            res.send(result)
+        })
+        app.get('/quantity', async (req, res) => {
+            const query = { "bookData.quantity": { $gt: "0" } };
+
+            const result = await allBooksCollection.find(query).toArray();
+            res.send(result);
+        });
         app.get('/books', verifyToken, async (req, res) => {
             const result = await allBooksCollection.find().toArray();
             res.send(result)
