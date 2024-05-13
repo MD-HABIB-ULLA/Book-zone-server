@@ -41,7 +41,7 @@ const verifyToken = (req, res, next) => {
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zqymdgy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -82,6 +82,26 @@ async function run() {
 
 
 
+        // book related api
+        app.put('/update/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedBookData = req.body;
+            const query = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+
+            const updateData = {
+                $set: {
+                    "bookData.image": updatedBookData.image,
+                    "bookData.name": updatedBookData.name,
+                    "bookData.author": updatedBookData.author,
+                    "bookData.category": updatedBookData.category,
+                    "bookData.rating": updatedBookData.rating,
+                }
+            }
+            const result = await allBooksCollection.updateOne(query, updateData, options);
+            console.log(query)
+            res.send(result)
+        })
 
         app.get('/categories', async (req, res) => {
             const result = await categoryCollection.find().toArray();
@@ -92,6 +112,13 @@ async function run() {
             console.log(category)
             const query = { "bookData.category": category }
             const result = await allBooksCollection.find(query).toArray();
+            res.send(result)
+        })
+        app.get('/books/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(category)
+            const query = { _id: new ObjectId(id) }
+            const result = await allBooksCollection.findOne(query);
             res.send(result)
         })
         app.get('/quantity', async (req, res) => {
