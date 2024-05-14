@@ -152,8 +152,11 @@ async function run() {
         })
         app.post('/addBorrowBook', async (req, res) => {
             const BorrowDetail = req.body;
+            const emailQuary = req.body.email;
             const quary = req.body.bookId;
-            const existingDocument = await allBorrowBooksCollection.findOne({ bookId: quary });
+            const existingDocument = await allBorrowBooksCollection.findOne({ email: emailQuary, bookId: quary });
+            // const existingEmailData = await allBorrowBooksCollection.find({ email: emailQuary });
+            // console.log(existingDocument)
             if (existingDocument) {
                 res.status(400).json({ message: 'Duplicate document: This book has already been borrowed.' })
             } else {
@@ -164,8 +167,10 @@ async function run() {
 
 
         })
-        app.get('/addBorrowBook', async (req, res) => {
-            const result = await allBorrowBooksCollection.find().toArray()
+        app.get('/borrowedBooks/:email', async (req, res) => {
+            const email = req.params.email;
+            const quary ={email: email}
+            const result = await allBorrowBooksCollection.find(quary).toArray();
             res.send(result);
         })
         app.get('/', (req, res) => {
