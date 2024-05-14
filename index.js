@@ -11,6 +11,8 @@ require('dotenv').config()
 app.use(cors({
     origin: [
         'http://localhost:5173',
+        "https://bookzone-7c036.web.app",
+        "bookzone-7c036.firebaseapp.com"
     ],
     credentials: true
 }));
@@ -62,6 +64,7 @@ async function run() {
     try {
         const categoryCollection = client.db("bookzone").collection("Categories");
         const allBooksCollection = client.db("bookzone").collection("books");
+        const allBorrowBooksCollection = client.db("bookzone").collection("borrowBooks");
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         // auth realated api 
@@ -102,6 +105,15 @@ async function run() {
             console.log(query)
             res.send(result)
         })
+        app.post('/updatequantity/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await allBooksCollection.updateOne(query,
+                { $inc: { "bookData.quantity": -1 } }
+            );
+            res.send(result);
+        });
+
 
         app.get('/categories', async (req, res) => {
             const result = await categoryCollection.find().toArray();
@@ -122,7 +134,7 @@ async function run() {
             res.send(result)
         })
         app.get('/quantity', async (req, res) => {
-            const query = { "bookData.quantity": { $gt: "0" } };
+            const query = { "bookData.quantity": { $gt: 0 } };
 
             const result = await allBooksCollection.find(query).toArray();
             res.send(result);
@@ -136,6 +148,24 @@ async function run() {
             const bookDetail = req.body;
             console.log(bookDetail)
             const result = await allBooksCollection.insertOne(bookDetail)
+            res.send(result);
+        })
+        app.post('/addBorrowBook', async (req, res) => {
+            const BorrowDetail = req.body;
+            const quary = req.body.bookId;
+            const existingDocument = await allBorrowBooksCollection.findOne({ bookId: quary });
+            if (existingDocument) {
+                res.status(400).json({ message: 'Duplicate document: This book has already been borrowed.' })
+            } else {
+                const result = await allBorrowBooksCollection.insertOne(BorrowDetail);
+                res.send(result);
+            }
+
+
+
+        })
+        app.get('/addBorrowBook', async (req, res) => {
+            const result = await allBorrowBooksCollection.find().toArray()
             res.send(result);
         })
         app.get('/', (req, res) => {
