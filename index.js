@@ -25,7 +25,7 @@ app.use(cookieParser())
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token
-    console.log("this is token", token)
+
     if (!token) {
         return res.status(401).send({ massage: 'unauthorized access' })
     }
@@ -70,7 +70,7 @@ async function run() {
         // auth realated api 
         app.post('/jwt', async (req, res) => {
             const user = req.body;
-            console.log(user);
+
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             res
                 .cookie('token', token, cookieOptions)
@@ -79,7 +79,7 @@ async function run() {
 
         app.post('/logout', async (req, res) => {
             const user = req.body;
-            console.log('logging out', user);
+
             res.clearCookie('token  ', { ...cookieOptions, maxAge: 0 }).send({ success: true })
         })
 
@@ -102,7 +102,7 @@ async function run() {
                 }
             }
             const result = await allBooksCollection.updateOne(query, updateData, options);
-            console.log(query)
+
             res.send(result)
         })
         app.post('/updatequantity/:id', async (req, res) => {
@@ -110,6 +110,14 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await allBooksCollection.updateOne(query,
                 { $inc: { "bookData.quantity": -1 } }
+            );
+            res.send(result);
+        });
+        app.post('/returnBookQuantity/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await allBooksCollection.updateOne(query,
+                { $inc: { "bookData.quantity": 1 } }
             );
             res.send(result);
         });
@@ -121,7 +129,7 @@ async function run() {
         })
         app.get('/category/:category', async (req, res) => {
             const category = req.params.category;
-            console.log(category)
+
             const query = { "bookData.category": category }
             const result = await allBooksCollection.find(query).toArray();
             res.send(result)
@@ -146,7 +154,7 @@ async function run() {
 
         app.post('/addbooks', verifyToken, async (req, res) => {
             const bookDetail = req.body;
-            console.log(bookDetail)
+
             const result = await allBooksCollection.insertOne(bookDetail)
             res.send(result);
         })
@@ -169,10 +177,20 @@ async function run() {
         })
         app.get('/borrowedBooks/:email', async (req, res) => {
             const email = req.params.email;
-            const quary ={email: email}
+            const quary = { email: email }
             const result = await allBorrowBooksCollection.find(quary).toArray();
             res.send(result);
         })
+        app.delete('/returnBook/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+
+
+            const result = await allBorrowBooksCollection.deleteOne(query);
+            res.send(result)
+        })
+
+
         app.get('/', (req, res) => {
             res.send('Hello World!')
         })
