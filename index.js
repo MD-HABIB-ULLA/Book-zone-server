@@ -12,7 +12,6 @@ app.use(cors({
     origin: [
         'http://localhost:5173',
         "https://bookzone-7c036.web.app",
-        "bookzone-7c036.firebaseapp.com"
     ],
     credentials: true
 }));
@@ -68,6 +67,14 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         // auth realated api 
+
+        // middleware
+
+
+
+
+
+
         app.post('/jwt', async (req, res) => {
             const user = req.body;
 
@@ -191,6 +198,25 @@ async function run() {
         })
 
 
+
+
+        app.post('/search', async (req, res) => {
+            const query = req.body.query.toLowerCase();
+            // console.log(query)
+            try {
+            //   const allBooksCollection = client.db("bookzone").collection("books");
+              const results = await allBooksCollection.find({
+                $or: [
+                  { "bookData.name": { $regex: query, $options: 'i' } },
+                  { "bookData.author": { $regex: query, $options: 'i' } }
+                ]
+              }).toArray();
+              res.json(results);
+            } catch (error) {
+              console.error('Error searching:', error);
+              res.status(500).json({ error: 'An error occurred while searching' });
+            }
+          });
         app.get('/', (req, res) => {
             res.send('Hello World!')
         })
