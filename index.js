@@ -12,6 +12,7 @@ app.use(cors({
     origin: [
         'http://localhost:5173',
         "https://bookzone-7c036.web.app",
+        "https://bookzone-7c036.firebaseapp.com"
     ],
     credentials: true
 }));
