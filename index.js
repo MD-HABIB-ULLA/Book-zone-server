@@ -155,7 +155,7 @@ async function run() {
             const result = await allBooksCollection.find(query).toArray();
             res.send(result);
         });
-        app.get('/books', verifyToken, async (req, res) => {
+        app.get('/books', async (req, res) => {
             const result = await allBooksCollection.find().toArray();
             res.send(result)
         })
@@ -205,19 +205,19 @@ async function run() {
             const query = req.body.query.toLowerCase();
             // console.log(query)
             try {
-            //   const allBooksCollection = client.db("bookzone").collection("books");
-              const results = await allBooksCollection.find({
-                $or: [
-                  { "bookData.name": { $regex: query, $options: 'i' } },
-                  { "bookData.author": { $regex: query, $options: 'i' } }
-                ]
-              }).toArray();
-              res.json(results);
+                //   const allBooksCollection = client.db("bookzone").collection("books");
+                const results = await allBooksCollection.find({
+                    $or: [
+                        { "bookData.name": { $regex: query, $options: 'i' } },
+                        { "bookData.author": { $regex: query, $options: 'i' } }
+                    ]
+                }).toArray();
+                res.json(results);
             } catch (error) {
-              console.error('Error searching:', error);
-              res.status(500).json({ error: 'An error occurred while searching' });
+                console.error('Error searching:', error);
+                res.status(500).json({ error: 'An error occurred while searching' });
             }
-          });
+        });
         app.get('/', (req, res) => {
             res.send('Hello World!')
         })
