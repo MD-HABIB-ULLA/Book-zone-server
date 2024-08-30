@@ -65,6 +65,7 @@ async function run() {
         const categoryCollection = client.db("bookzone").collection("Categories");
         const allBooksCollection = client.db("bookzone").collection("books");
         const allBorrowBooksCollection = client.db("bookzone").collection("borrowBooks");
+        const userCollection = client.db("bookzone").collection("users");
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         // auth realated api 
@@ -183,6 +184,19 @@ async function run() {
 
 
         })
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+
+            const query = { email: user.email }
+            const existingUser = await userCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: 'user already exists', insertedId: null })
+            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        });
+
         app.get('/borrowedBooks/:email', async (req, res) => {
             const email = req.params.email;
             const quary = { email: email }
